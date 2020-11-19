@@ -40,6 +40,11 @@ h1 {
     box-shadow: 0px 13px 10px 5px #33323287;
 }
 
+.buttons>button:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
 .modal {
     height: 100px;
     width: 20%;
@@ -108,8 +113,22 @@ table.board {
 .lives {
     width: 200px;
     position: absolute;
-    left: 56.5%;
+    margin-left: 15px;
     top: 178px;
+    border-radius: 10px;
+    padding: 3px;
+    border: 3px;
+    border-color: black;
+    border-style: outset;
+    background-color: #ffffff73;
+    font-size: xx-large;
+}
+
+.undo {
+    width: 200px;
+    position: absolute;
+    margin-left: 191px;
+    top: 235px;
     border-radius: 10px;
     padding: 3px;
     border: 3px;
@@ -123,7 +142,7 @@ table.board {
     font-size: xx-large;
     width: 200px;
     position: absolute;
-    left: 30.2%;
+    margin-left: -390px;
     top: 178px;
     background-color: darkgrey;
     border-radius: 10px;
@@ -134,25 +153,11 @@ table.board {
     background-color: #ffffff73;
 }
 
-.undo {
-    width: 200px;
-    position: absolute;
-    left: 56.5%;
-    top: 235px;
-    border-radius: 10px;
-    padding: 3px;
-    border: 3px;
-    border-color: black;
-    border-style: outset;
-    background-color: #ffffff73;
-    font-size: xx-large;
-}
-
 .safe-click {
     font-size: xx-large;
     width: 200px;
     position: absolute;
-    left: 30.2%;
+    margin-left: -213px;
     top: 235px;
     background-color: darkgrey;
     border-radius: 10px;
@@ -163,15 +168,26 @@ table.board {
     background-color: #ffffff73;
 }
 
-
-/*
-td.hints {
-    width: 60px;
+div.all-buttons>* {
+    display: inline-block;
 }
-*/
 
-td.red {
-    background-color: red;
+div.all-buttons {
+    width: 700px;
+    margin: auto;
+}
+
+div.all-buttons>div:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+}
+
+.safe {
+    background-color: goldenrod;
+}
+
+.safe-click span {
+    color: red;
 }
 
 td {
@@ -181,6 +197,15 @@ td {
     width: 40px;
     height: 40px;
     background-color: #e3ffa0c9;
+}
+
+td.red {
+    background-color: red;
+}
+
+td:not(.pressed):not(.timer):not(.counter):hover {
+    transform: scale(1.06);
+    cursor: pointer;
 }
 
 .pressed {

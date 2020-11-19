@@ -6,8 +6,9 @@ const MINE = 'mine'
 var gMinesCount = [2, 12, 30]
 var gFirstMove
 var gLevel = 2
+var gSafeClicks
 var gMines = []
-var gBoards = []
+var gChanged
 var gGameOn
 var gBoard
 var gTimerInterval
@@ -16,31 +17,31 @@ var gFlagCount
 var glives
 var gHints
 var gIsHint
+var gRecCount
 
 
-//make hints
 //best score
-//safe click
-//recorsive expend
 
 function init() {
-    gGameOn = false
-    clearInterval(gTimerInterval)
-    glives = 3
-    renderCounters('lives', '❤️', glives)
+    gChanged = []
     gHints = 3
+    gSafeClicks = 3
+    gGameOn = false
+    glives = 3
+    clearInterval(gTimerInterval)
+    renderCounters('lives', '❤️', glives)
     renderCounters('hints', '🔎', gHints)
     renderCounters('emoji', '😄', 1)
+    renderCounters('timer', '0.000', 1)
     gMines = []
-    gBoards = []
     gIsHint = false
     gBoard = makeBoard(gLevel)
-    gBoards.push(gBoard)
-    renderBoard(gLevel)
+    renderBoard(gBoard)
     gFirstMove = true
     gFlagCount = gMinesCount[gLevel - 1]
-    console.log(gFlagCount)
     document.querySelector('.counter').innerHTML = gFlagCount
+    document.querySelector('.safe-click span').innerHTML = '|||'
+
 }
 
 function makeBoard(level = 2) {
@@ -69,29 +70,29 @@ function addMines(board, level = 2) {
             minesCount--
         }
     }
-    console.log(gMines)
 }
 
-function renderBoard(level = 2) {
-    var sizes = [4, 8, 12]
-    var size = sizes[level - 1]
+function renderBoard(board) {
+    var size = board.length
     var txtHtml = ''
     for (var i = 0; i < size; i++) {
         txtHtml += '<tr>\n'
         for (var j = 0; j < size; j++) {
-            var value = gBoard[i][j].ispressed ? gBoard[i][j].mineNegsCount : ''
-            if (gBoard[i][j].isFlaged) value = '🏴‍☠️'
-            txtHtml += `\t<td class="cell-${i}-${j}" oncontextmenu="cellMarked(event)" onclick="cellClicked(this)">${value}</td>\n`
+            var cell = board[i][j]
+            var value = ''
+            var cellClass = ''
+            if (cell.isPressed) {
+                cellClass = ' pressed'
+                if (cell.mineNegsCount > 0) value = cell.mineNegsCount
+            }
+            if (cell.isFlaged) value = '🏴‍☠️'
+            txtHtml += `\t<td class="cell-${i}-${j}${cellClass}" oncontextmenu="cellMarked(event)" onclick="cellClicked(this,true)">${value}</td>\n`
         }
         txtHtml += '</tr>\n'
     }
     var elBoard = document.querySelector('.board')
     elBoard.innerHTML = txtHtml
 }
-
-
-
-
 
 function countCellNegs(cell, mat) {
     var count = 0
@@ -117,34 +118,50 @@ function countBoardNegs(board) {
     }
 }
 
-function cellClicked(elCell) {
+function cellClicked(elCell, calledInClick = false) {
+    // counting recursion
+    if (calledInClick) gRecCount = 0
+    gRecCount++
     //prevent playing while game over
     if (!gGameOn && !gFirstMove) return
-    console.log(gTimerInterval)
-
-    //firt move actions
-    if (gFirstMove) {
-        gGameOn = true
-        gStartTime = new Date
-        gTimerInterval = setInterval(timer, 80)
-        addMines(gBoard, gLevel)
-        countBoardNegs(gBoard)
-    }
 
     //get cell and check if valid
     var cellClass = elCell.classList[0]
     var coord = getCoorByClass(cellClass)
     var cell = gBoard[coord.i][coord.j]
 
-    //when hunt is on
-    if (gIsHint) {
-        console.log(cell)
-        var cells = cell.negs
-        cells.push(cell)
-        for (var i = 0; i < cells.length; i++) {
-            renderCell(cells[i], cells[i.type])
-        }
+    //firt move actions
+    if (gFirstMove) {
+        gGameOn = true
+        gStartTime = new Date
+        gTimerInterval = setInterval(timer, 80)
+        cell.isPressed = true
+        addMines(gBoard, gLevel)
+        countBoardNegs(gBoard)
+        gFirstMove = false
+    }
 
+    //when hint is on
+    if (gIsHint) {
+        gHints--
+        gIsHint = false
+        var cells = cell.negs
+        cells.push(cell.coord)
+        for (var i = 0; i < cells.length; i++) {
+            cell = gBoard[cells[i].i][cells[i].j]
+            if (cell.isFlaged || cell.isPressed) continue
+            renderCell(cells[i], cell.type === MINE ? '💣' : cell.mineNegsCount, 'red')
+        }
+        setTimeout(function() {
+            for (var i = 0; i < cells.length; i++) {
+                cell = gBoard[cells[i].i][cells[i].j]
+                if (cell.isFlaged || cell.isPressed) continue
+                renderCell(cells[i], '', 'red', true)
+            }
+        }, 1000)
+        renderCounters('hints', '🔎', gHints, '', 3 - gHints)
+
+        return
     }
 
     if (cell.isFlaged) return
@@ -153,6 +170,7 @@ function cellClicked(elCell) {
     if (cell.type === MINE) {
         glives--
         renderCounters('lives', '❤️', glives)
+        gChanged.push({ type: 'clikedMine', changed: cell })
         if (glives > 0) return
         gameOver(false, cell)
         return
@@ -163,37 +181,34 @@ function cellClicked(elCell) {
     elCell.classList.add('pressed')
     var value = (cell.mineNegsCount) ? cell.mineNegsCount : ''
     renderCell(coord, value)
-
-    //handle negs
+    var changed = [cell]
+        //handle negs
     if (!value) {
         for (var idx = 0; idx < cell.negs.length; idx++) {
             var negCoord = cell.negs[idx]
             var neg = gBoard[negCoord.i][negCoord.j]
-            if (neg.isFlaged) continue
+            if (neg.isFlaged || neg.isPressed) continue
             if (neg.type !== MINE) {
                 var elNeg = document.querySelector(getClassByCoord(negCoord))
+                changed.push(neg)
                 if (neg.mineNegsCount) {
                     neg.isPressed = true
                     elNeg.classList.add('pressed')
                     renderCell(negCoord, neg.mineNegsCount)
                 } else {
-                    //cellClicked(elNeg) code below is temporary
-                    neg.isPressed = true
-                    elNeg.classList.add('pressed')
-                    renderCell(negCoord, '')
+                    cellClicked(elNeg)
                 }
             }
         }
     }
     checkIfWin()
 
-    gBoards.push(gBoard)
-    if (gFirstMove) gFirstMove = !gFirstMove
+    gChanged.push({ type: 'click', changed, count: gRecCount })
 
 
 }
 
-function cellMarked(ev) {
+function cellMarked(ev, calledInClick = false) {
     if (!gGameOn && !gFirstMove) return
     ev.preventDefault();
     var elCell = ev.target
@@ -207,15 +222,70 @@ function cellMarked(ev) {
     var value = cell.isFlaged ? '🏴‍☠' : ''
     renderCell(cell.coord, value)
     checkIfWin()
-
-    gBoards.push(gBoard)
     document.querySelector('.counter').innerHTML = gFlagCount
+    gChanged.push({ type: 'mark', changed: [cell] })
 
 }
 
 function getHint() {
-    gIsHint = !gIsHint
-    renderCounters('hints', '🔎nbsp&nbsp&nbsp🔎&nbsp&nbsp&nbsp💡', 1)
+    if (gHints <= 0) return
+    gIsHint = true
+    renderCounters('hints', '🔎', gHints - 1, '💡')
+}
+
+function sefeClick() {
+    var cell = getEmptyCell(gBoard)
+    if (!cell) {
+        alert('no empty cells found')
+        return
+    }
+    var elCell = document.querySelector(getClassByCoord(cell.coord))
+    if (gSafeClicks <= 0) return
+    elCell.classList.add('safe')
+    setInterval(function() { elCell.classList.remove('safe') }, 1500)
+    gSafeClicks--
+    var value = ''
+    for (var i = 0; i < gSafeClicks; i++) {
+        value += '|'
+    }
+    document.querySelector('.safe-click span').innerHTML = value
+
+}
+
+function undo() {
+    if (!gGameOn) return
+    if (!gChanged.length) return
+    var change = gChanged.pop()
+    if (change.type === 'click') {
+        for (var count = change.count; count > 0; count--) {
+            console.log(change)
+            for (var i = 0; i < change.changed.length; i++) {
+                var cell = change.changed[i]
+                cell.isPressed = false
+                var elCell = document.querySelector(getClassByCoord(cell.coord))
+                elCell.classList.remove('pressed')
+                renderCell(cell.coord, '')
+            }
+            if (count > 1) change = gChanged.pop()
+        }
+    } else if (change.type === 'mark') {
+        var cell = change.changed[0]
+        if (cell.isFlaged) {
+            cell.isFlaged = false
+            gFlagCount++
+            renderCell(cell.coord, '')
+        } else {
+            cell.isFlaged = true
+            gFlagCount--
+            renderCell(cell.coord, '🏴‍☠')
+        }
+        document.querySelector('.counter').innerHTML = gFlagCount
+
+    } else {
+        glives++
+        renderCounters('lives', '❤️', glives)
+    }
+
 }
 
 function checkIfWin() {
@@ -229,12 +299,22 @@ function checkIfWin() {
 }
 
 function gameOver(win, mineCell) {
+    var gameTime = timer()
     clearInterval(gTimerInterval)
+    renderCounters('timer', '0.000', 1)
+
     if (win) {
         //modal
         renderCounters('emoji', '🥳', 1)
         var elModal = document.querySelector('.win')
-        console.log('you wonnnn')
+        if (typeof(Storage) !== 'undefined') {
+            if (localStorage.bestScore) {
+                if (gameTime <= localStorage.bestScore) {
+                    localStorage.bestScore = gameTime
+                    alert('new best score!!')
+                }
+            } else localStorage.setItem("bestScore", gameTime)
+        }
     } else {
         // modals
         renderCounters('emoji', '😢', 1)
@@ -260,10 +340,10 @@ function getCoorByClass(cellClass) {
     return { i: cellClass[1], j: cellClass[2] }
 }
 
-function getClassByCoord(coor) {
-    if (coor) {
-        var i = coor.i
-        var j = coor.j
+function getClassByCoord(coord) {
+    if (coord) {
+        var i = coord.i
+        var j = coord.j
         var cellClass = '.cell-' + i + '-' + j
         return cellClass
     }
@@ -276,19 +356,28 @@ function timer() {
     elTimer.innerHTML = time.toFixed(3)
 }
 
-function renderCell(location, value) {
+function renderCell(location, value, cellClass = null, remove = false) {
     var elCell = document.querySelector(`.cell-${location.i}-${location.j}`);
     elCell.innerHTML = value;
+    if (cellClass) {
+        if (remove) elCell.classList.remove(cellClass)
+        else elCell.classList.add(cellClass)
+    }
 }
 
-function renderCounters(counterClass, value, num) {
+function renderCounters(counterClass, value, num, value2 = null, num2 = 1) {
     var txt = '&nbsp&nbsp&nbsp'
     while (num > 0) {
         txt += value + '&nbsp&nbsp&nbsp'
         num--
     }
+    if (value2) {
+        while (num2 > 0) {
+            txt += value2 + '&nbsp&nbsp&nbsp'
+            num2--
+        }
+    }
     document.querySelector('.' + counterClass).innerHTML = txt
-
 }
 
 function getEmptyCell(board) {
@@ -302,7 +391,6 @@ function getEmptyCell(board) {
     i = getRandomInt(emptyCells.length)
     var cell = emptyCells.splice(i, 1)[0]
     return cell
-
 }
 
 function getRandomInt(max, min = 0) {

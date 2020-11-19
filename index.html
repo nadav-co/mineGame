@@ -4,19 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mine SWeeper</title>
+    <title>Mine Sweeper</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body onload="init()">
-    <h1>Hello Mine</h1>
+    <h1>Mine Sweeper</h1>
     <div class="buttons">
         <button onclick="gLevel = 1;init()">beginner</button>
         <button onclick="gLevel = 2;init()">intermediate</button>
         <button onclick="gLevel = 3;init()">extreme</button>
     </div>
-    <div class="display">
-        <table>
+    <div class="all-buttons">
+        <div onclick="undo()" class="undo">undo</div>
+        <div class="safe-click" onclick="sefeClick()">safe-clicks <span>|||</span></div>
+        <table class="display">
             <tr>
                 <td onclick="init()" colspan="2" class="emoji ">😄</td>
             </tr>
@@ -27,18 +29,11 @@
         </table>
         <div class="lives "></div>
         <div class="hints" onclick="getHint()"></div>
-
-
     </div>
 
-    <!-- <div class="emoji display">:)</div>
-    <div class="counter display">100</div>
-    <div class="timer display"></div> -->
     <div class="modal win">you won!!</div>
     <div class="modal loss">you lost :((</div>
     <table class="board"></table>
-    <div onclick="undo()" class="undo">undo</div>
-    <div class="safe-click" onclick="sefeClick()">safe-click</div>
     <script src="js/main.js"></script>
 </body>
 
