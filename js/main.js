@@ -18,6 +18,7 @@ var glives
 var gHints
 var gIsHint
 var gRecCount
+var gClickTime
 
 
 //best score
@@ -86,7 +87,7 @@ function renderBoard(board) {
                 if (cell.mineNegsCount > 0) value = cell.mineNegsCount
             }
             if (cell.isFlaged) value = '🏴‍☠️'
-            txtHtml += `\t<td class="cell-${i}-${j}${cellClass}" ondblclick="cellMarked(event)" oncontextmenu="cellMarked(event)" onclick="cellClicked(this,true)">${value}</td>\n`
+            txtHtml += `\t<td class="cell-${i}-${j}${cellClass}" oncontextmenu="cellMarked(event)" onmousedown="gClickTime = new Date" onmouseup="checkClick(event)">${value}</td>\n`
         }
         txtHtml += '</tr>\n'
     }
@@ -116,6 +117,15 @@ function countBoardNegs(board) {
             countCellNegs(board[i][j], board)
         }
     }
+}
+
+function checkClick(ev) {
+    var elCell = ev.target
+    var time = new Date
+    var diff = time - gClickTime
+    if (diff < 600) cellClicked(elCell, true)
+    else cellMarked(ev)
+
 }
 
 function cellClicked(elCell, calledInClick = false) {
