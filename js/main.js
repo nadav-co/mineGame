@@ -120,6 +120,7 @@ function countBoardNegs(board) {
 }
 
 function checkClick(ev) {
+    if (ev.button === 0) return
     var elCell = ev.target
     var time = new Date
     var diff = time - gClickTime

@@ -1,2 +1,7 @@
 @import './style-mobile.css';
 @import './style-desktop.css' screen and (min-width: 768px);
+body {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
