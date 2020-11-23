@@ -1,0 +1,210 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #009da2;
+    text-align: center;
+    vertical-align: auto;
+    margin: 0px;
+    background-image: url(../img/background.jpg);
+    background-size: 100%;
+    font-weight: bolder;
+    height: 100%;
+}
+
+h1 {
+    padding: 10px;
+    width: 100%;
+    box-shadow: 0px 2px 3px 1px #33323287;
+    margin: auto;
+    border-radius: 15px;
+    margin-top: 20px;
+    background-color: #d2efec88;
+}
+
+.buttons>button {
+    height: 30px;
+    width: 100px;
+    background-color: #fff;
+    border-radius: 10px;
+    border: 0ch;
+    font-weight: bolder;
+    box-shadow: -1px 13px 10px 5px #33323287;
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+    box-shadow: 0px 13px 10px 5px #33323287;
+}
+
+.buttons>button:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.modal {
+    height: 100px;
+    width: 20%;
+    background-color: bisque;
+    position: absolute;
+    left: 40%;
+    border-radius: 30px;
+    font-size: xx-large;
+    font-weight: bolder;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    padding: 30px;
+    display: none;
+}
+
+.display {
+    position: relative;
+    left: -160px;
+    width: 120px;
+    background-color: #feff82c7;
+    border: solid;
+    border-color: black;
+    display: inline-block;
+    margin: auto;
+    margin-top: 10px;
+    border-spacing: 0px;
+    border-radius: 10px;
+    padding: 8px;
+    font-size: large;
+}
+
+.board {
+    background-color: gray;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    margin: auto;
+    box-shadow: 0px 13px 10px 5px #33323287;
+}
+
+table.display>td {
+    width: 30px;
+    box-shadow: 0px 13px 10px 5px #33323287;
+}
+
+table.board {
+    margin-top: 20px;
+    border-radius: 10px;
+    padding: 8px;
+    background-color: #a9a8a8d4;
+}
+
+.display.emoji {
+    display: block;
+    margin: 0%;
+}
+
+.counter {
+    color: black;
+}
+
+.timer {
+    color: black;
+}
+
+.lives {
+    width: 120px;
+    position: absolute;
+    margin-left: -158px;
+    top: 170px;
+    border-radius: 10px;
+    padding: 3px;
+    border: 3px;
+    border-color: black;
+    border-style: outset;
+    background-color: #ffffff73;
+    font-size: large;
+}
+
+.undo {
+    width: 120px;
+    position: absolute;
+    margin-left: -38px;
+    top: 130px;
+    border-radius: 10px;
+    padding: 3px;
+    border: 3px;
+    border-color: black;
+    border-style: outset;
+    background-color: #ffffff73;
+    font-size: large;
+}
+
+.hints {
+    font-size: medium;
+    width: 120px;
+    position: absolute;
+    margin-left: -405px;
+    top: 130px;
+    background-color: darkgrey;
+    border-radius: 10px;
+    padding: 3px;
+    border: 3px;
+    border-color: black;
+    border-style: outset;
+    background-color: #ffffff73;
+}
+
+.safe-click {
+    font-size: large;
+    width: 120px;
+    position: absolute;
+    margin-left: -283px;
+    top: 170px;
+    background-color: darkgrey;
+    border-radius: 10px;
+    padding: 3px;
+    border: 3px;
+    border-color: black;
+    border-style: outset;
+    background-color: #ffffff73;
+}
+
+div.all-buttons>* {
+    display: inline-block;
+}
+
+div.all-buttons {
+    width: 700px;
+    margin: auto;
+}
+
+div.all-buttons>div:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+}
+
+.safe {
+    background-color: goldenrod;
+}
+
+.safe-click span {
+    color: red;
+}
+
+td {
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    width: 30px;
+    height: 30px;
+    background-color: #e3ffa0c9;
+}
+
+td.red {
+    background-color: red;
+}
+
+td:not(.pressed):not(.timer):not(.counter):hover {
+    transform: scale(1.06);
+    cursor: pointer;
+}
+
+.pressed {
+    background-color: black;
+    color: beige;
+}

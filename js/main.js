@@ -86,7 +86,7 @@ function renderBoard(board) {
                 if (cell.mineNegsCount > 0) value = cell.mineNegsCount
             }
             if (cell.isFlaged) value = '🏴‍☠️'
-            txtHtml += `\t<td class="cell-${i}-${j}${cellClass}" oncontextmenu="cellMarked(event)" onclick="cellClicked(this,true)">${value}</td>\n`
+            txtHtml += `\t<td class="cell-${i}-${j}${cellClass}" ondblclick="cellMarked(event)" oncontextmenu="cellMarked(event)" onclick="cellClicked(this,true)">${value}</td>\n`
         }
         txtHtml += '</tr>\n'
     }
@@ -208,7 +208,7 @@ function cellClicked(elCell, calledInClick = false) {
 
 }
 
-function cellMarked(ev, calledInClick = false) {
+function cellMarked(ev) {
     if (!gGameOn && !gFirstMove) return
     ev.preventDefault();
     var elCell = ev.target
@@ -258,7 +258,6 @@ function undo() {
     var change = gChanged.pop()
     if (change.type === 'click') {
         for (var count = change.count; count > 0; count--) {
-            console.log(change)
             for (var i = 0; i < change.changed.length; i++) {
                 var cell = change.changed[i]
                 cell.isPressed = false
